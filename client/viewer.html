@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SyllaBot Pro - Course Viewer</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <meta name="description" content="View generated course content">
+</head>
+
+<body class="bg-background text-text min-h-screen antialiased">
+
+    <!-- Top accent bar -->
+    <div class="fixed top-0 left-0 w-full h-1 bg-linear-to-r from-primary via-secondary to-accent z-50"></div>
+
+    <!-- Layout wrapper: TOC sidebar + Content -->
+    <div id="viewer-layout" class="hidden viewer-grid max-w-7xl mx-auto px-4 py-12">
+
+        <!-- Sticky TOC Sidebar (hidden on small screens) -->
+        <aside class="viewer-sidebar">
+            <nav id="toc-nav" class="sticky top-8 max-h-[calc(100vh-4rem)] overflow-y-auto pr-4">
+                <h2 class="text-xs font-bold uppercase tracking-wider text-primary mb-4">Table of Contents</h2>
+                <ul id="toc-list" class="space-y-1 text-sm border-l-2 border-border pl-4">
+                    <!-- Generated dynamically -->
+                </ul>
+            </nav>
+        </aside>
+
+        <!-- Main Content Column -->
+        <main class="min-w-0">
+            <!-- Title Header -->
+            <div class="mb-10 text-center border-b border-border pb-10">
+                <h1 id="course-title" class="text-3xl md:text-4xl font-bold text-primary mb-4"></h1>
+            </div>
+
+            <!-- Mobile TOC (collapsible, shown only on small screens) -->
+            <details id="mobile-toc" class="viewer-mobile-toc mb-8 bg-surface/50 border border-border rounded-xl">
+                <summary
+                    class="cursor-pointer px-4 py-3 text-sm font-semibold text-primary flex items-center gap-2 select-none">
+                    📑 Table of Contents
+                </summary>
+                <ul id="toc-list-mobile" class="px-4 pb-4 space-y-1 text-sm">
+                    <!-- Generated dynamically -->
+                </ul>
+            </details>
+
+            <!-- Course Body -->
+            <div id="course-body" class="chapter-prose prose max-w-none text-text leading-relaxed"></div>
+        </main>
+    </div>
+
+    <!-- Loading State (shown initially, hidden after load) -->
+    <div id="loading" class="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
+        <div class="w-12 h-12 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
+        <p class="text-text-muted animate-pulse">Loading course...</p>
+    </div>
+
+    <!-- Error State -->
+    <div id="error" class="hidden">
+        <div class="flex flex-col items-center justify-center min-h-[50vh] space-y-4 text-center px-4">
+            <h2 class="text-2xl font-bold text-red-500">Failed to load content</h2>
+            <p id="error-message" class="text-text-muted max-w-md">The requested file could not be found or loaded.</p>
+            <a href="/"
+                class="mt-6 px-6 py-2 bg-surface hover:bg-surface-hover border border-border rounded-lg transition-colors inline-flex items-center gap-2">
+                ← Back to Generator
+            </a>
+        </div>
+    </div>
+
+    <script type="module" src="/src/viewer.ts"></script>
+</body>
+
+</html>

@@ -1,0 +1,371 @@
+@import "tailwindcss";
+@source "../viewer.html";
+
+@theme {
+  /* ── Surface colors ── */
+  --color-surface: oklch(0.18 0.06 240);
+  --color-surface-alt: oklch(0.22 0.05 240);
+  --color-surface-hover: oklch(0.25 0.05 240);
+
+  /* ── Border ── */
+  --color-border: oklch(0.30 0.04 240);
+
+  /* ── Accent colors ── */
+  --color-primary: oklch(0.66 0.23 40);
+  --color-primary-hover: oklch(0.60 0.25 40);
+  --color-secondary: oklch(0.60 0.20 280);
+  --color-accent: oklch(0.60 0.20 320);
+  --color-success: oklch(0.70 0.20 155);
+  --color-warning: oklch(0.75 0.18 85);
+  --color-danger: oklch(0.65 0.22 25);
+
+  /* ── Text ── */
+  --color-text: oklch(0.92 0.01 240);
+  --color-text-muted: oklch(0.60 0.02 240);
+
+  /* ── Typography ── */
+  --font-sans: "Inter", system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", "Fira Code", monospace;
+}
+
+/* ── Custom animations ── */
+@keyframes fadeSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes checkPop {
+  0% {
+    transform: scale(0);
+  }
+
+  60% {
+    transform: scale(1.2);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes subtleGlow {
+
+  0%,
+  100% {
+    box-shadow: 0 0 8px oklch(0.65 0.25 265 / 0.2);
+  }
+
+  50% {
+    box-shadow: 0 0 20px oklch(0.65 0.25 265 / 0.4);
+  }
+}
+
+/* ── Light theme overrides ── */
+[data-theme="light"] {
+  --color-surface: oklch(0.97 0.005 260);
+  --color-surface-alt: oklch(0.93 0.008 260);
+  --color-surface-hover: oklch(0.88 0.01 260);
+  --color-border: oklch(0.82 0.015 260);
+  --color-primary: oklch(0.60 0.20 40);
+  --color-primary-hover: oklch(0.55 0.22 40);
+  --color-secondary: oklch(0.55 0.18 280);
+  --color-accent: oklch(0.55 0.18 320);
+  --color-text: oklch(0.20 0.01 260);
+  --color-text-muted: oklch(0.45 0.02 260);
+}
+
+/* ── Base styles ── */
+html {
+  color-scheme: dark;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+}
+
+body {
+  background-color: var(--color-surface);
+  color: var(--color-text);
+  font-family: var(--font-sans);
+  min-height: 100vh;
+}
+
+/* ── Scrollbar styling ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: oklch(0.35 0.02 260);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.45 0.02 260);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: oklch(0.75 0.015 260);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.65 0.015 260);
+}
+
+/* ── Theme toggle ── */
+#btn-theme {
+  transition: transform 0.3s ease, background-color 0.2s ease;
+}
+
+#btn-theme:hover {
+  transform: scale(1.1);
+}
+
+#btn-theme:active {
+  transform: scale(0.95);
+}
+
+#btn-theme .icon-sun,
+#btn-theme .icon-moon {
+  transition: opacity 0.2s ease, transform 0.3s ease;
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+[data-theme="light"] #btn-theme .icon-moon {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+[data-theme="light"] #btn-theme .icon-sun {
+  opacity: 0;
+  transform: rotate(-90deg);
+}
+
+:root:not([data-theme="light"]) #btn-theme .icon-sun {
+  opacity: 1;
+  transform: rotate(0deg);
+}
+
+:root:not([data-theme="light"]) #btn-theme .icon-moon {
+  opacity: 0;
+  transform: rotate(90deg);
+}
+
+/* ── Chapter content area ── */
+.chapter-content {
+  overflow-y: auto;
+  max-height: 400px;
+  min-height: 80px;
+  resize: vertical;
+  scrollbar-width: thin;
+}
+
+/* ── Chevron toggle rotation ── */
+.chapter-toggle i,
+.chapter-toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.rotate-180 {
+  transform: rotate(180deg) !important;
+}
+
+/* ── Prose / Markdown Rendered Content ── */
+.chapter-prose {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--color-text);
+}
+
+.chapter-prose h1,
+.chapter-prose h2,
+.chapter-prose h3,
+.chapter-prose h4,
+.chapter-prose h5,
+.chapter-prose h6 {
+  font-weight: 600;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  color: var(--color-text);
+}
+
+.chapter-prose h1 {
+  font-size: 1.5rem;
+}
+
+.chapter-prose h2 {
+  font-size: 1.3rem;
+  border-bottom: 1px solid var(--color-border);
+  padding-bottom: 0.3em;
+}
+
+.chapter-prose h3 {
+  font-size: 1.1rem;
+}
+
+.chapter-prose p {
+  margin-bottom: 0.75em;
+}
+
+.chapter-prose ul,
+.chapter-prose ol {
+  padding-left: 1.5em;
+  margin-bottom: 0.75em;
+}
+
+.chapter-prose ul {
+  list-style-type: disc;
+}
+
+.chapter-prose ol {
+  list-style-type: decimal;
+}
+
+.chapter-prose li {
+  margin-bottom: 0.25em;
+}
+
+.chapter-prose strong {
+  font-weight: 600;
+}
+
+.chapter-prose em {
+  font-style: italic;
+}
+
+.chapter-prose a {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.chapter-prose blockquote {
+  border-left: 3px solid var(--color-primary);
+  padding: 0.5em 1em;
+  margin: 0.75em 0;
+  background: oklch(0.18 0.01 260 / 0.5);
+  border-radius: 0 0.5rem 0.5rem 0;
+}
+
+[data-theme="light"] .chapter-prose blockquote {
+  background: oklch(0.93 0.005 260 / 0.5);
+}
+
+.chapter-prose hr {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 1.5em 0;
+}
+
+/* ── Tables ── */
+.chapter-prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1em 0;
+  font-size: 0.85rem;
+}
+
+.chapter-prose th,
+.chapter-prose td {
+  border: 1px solid var(--color-border);
+  padding: 0.5em 0.75em;
+  text-align: left;
+}
+
+.chapter-prose th {
+  background: oklch(0.22 0.015 260);
+  font-weight: 600;
+}
+
+[data-theme="light"] .chapter-prose th {
+  background: oklch(0.90 0.008 260);
+}
+
+.chapter-prose tr:nth-child(even) {
+  background: oklch(0.17 0.01 260 / 0.3);
+}
+
+[data-theme="light"] .chapter-prose tr:nth-child(even) {
+  background: oklch(0.95 0.005 260 / 0.3);
+}
+
+/* ── Code blocks ── */
+.chapter-prose code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: oklch(0.20 0.015 260);
+  padding: 0.15em 0.4em;
+  border-radius: 0.25rem;
+  border: 1px solid var(--color-border);
+}
+
+[data-theme="light"] .chapter-prose code {
+  background: oklch(0.92 0.008 260);
+}
+
+.chapter-prose pre {
+  margin: 1em 0;
+  padding: 1em;
+  background: oklch(0.13 0.01 260);
+  border: 1px solid var(--color-border);
+  border-radius: 0.5rem;
+  overflow-x: auto;
+}
+
+[data-theme="light"] .chapter-prose pre {
+  background: oklch(0.96 0.005 260);
+}
+
+.chapter-prose pre code {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85em;
+}
+
+/* ── Images ── */
+.chapter-prose img {
+  max-width: 100%;
+  border-radius: 0.5rem;
+  margin: 1em 0;
+}
+
+/* ── Viewer page layout ── */
+.viewer-sidebar {
+  display: none;
+}
+
+.viewer-mobile-toc {
+  display: block;
+}
+
+@media (min-width: 1024px) {
+  .viewer-grid {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 2.5rem;
+  }
+
+  .viewer-sidebar {
+    display: block;
+  }
+
+  .viewer-mobile-toc {
+    display: none;
+  }
+}

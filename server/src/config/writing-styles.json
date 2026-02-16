@@ -1,0 +1,117 @@
+[
+    {
+        "id": "academic",
+        "name": "Academic",
+        "description": "Formal, scholarly tone with citations and references"
+    },
+    {
+        "id": "conversational",
+        "name": "Conversational",
+        "description": "Friendly, approachable tone as if explaining to a colleague"
+    },
+    {
+        "id": "technical",
+        "name": "Technical",
+        "description": "Precise, detail-oriented with code examples and specifications"
+    },
+    {
+        "id": "storytelling",
+        "name": "Storytelling",
+        "description": "Narrative-driven, using analogies and real-world scenarios"
+    },
+    {
+        "id": "step-by-step",
+        "name": "Step-by-Step",
+        "description": "Tutorial-style with clear numbered instructions"
+    },
+    {
+        "id": "concise",
+        "name": "Concise",
+        "description": "Brief and to the point, minimal fluff"
+    },
+    {
+        "id": "beginner-friendly",
+        "name": "Beginner Friendly",
+        "description": "Simple language, lots of examples, no assumed knowledge"
+    },
+    {
+        "id": "in-depth",
+        "name": "In Depth",
+        "description": "Comprehensive explanations with deep dives into concepts and reasoning"
+    },
+    {
+        "id": "motivational",
+        "name": "Motivational",
+        "description": "Encouraging, inspiring tone designed to boost engagement and confidence"
+    },
+    {
+        "id": "humorous",
+        "name": "Humorous",
+        "description": "Lighthearted tone with jokes and witty analogies to make learning fun"
+    },
+    {
+        "id": "visual",
+        "name": "Visual",
+        "description": "Focuses on diagrams, mental models, and highly descriptive examples"
+    },
+    {
+        "id": "exam-oriented",
+        "name": "Exam Oriented",
+        "description": "Focused on test preparation, key points, and typical exam questions"
+    },
+    {
+        "id": "research-oriented",
+        "name": "Research Oriented",
+        "description": "Evidence-based with citations, studies, and thorough methodology"
+    },
+    {
+        "id": "project-based",
+        "name": "Project Based",
+        "description": "Centered around building a project step-by-step with practical tasks"
+    },
+    {
+        "id": "hands-on",
+        "name": "Hands On",
+        "description": "Activity-driven style with exercises, tasks, and real-world application"
+    },
+    {
+        "id": "dialogue",
+        "name": "Dialogue",
+        "description": "Presented as a conversation between two characters or personas"
+    },
+    {
+        "id": "formal",
+        "name": "Formal",
+        "description": "Strictly professional tone with structured, polished language"
+    },
+    {
+        "id": "informal",
+        "name": "Informal",
+        "description": "Relaxed, casual tone that feels friendly and approachable"
+    },
+    {
+        "id": "socratic",
+        "name": "Socratic",
+        "description": "Uses questions and guided reasoning to lead learners to conclusions"
+    },
+    {
+        "id": "algorithmic",
+        "name": "Algorithmic",
+        "description": "Breaks concepts into logical decision trees, flows, and structured steps"
+    },
+    {
+        "id": "comparative",
+        "name": "Comparative",
+        "description": "Explains concepts by comparing alternatives, pros vs cons"
+    },
+    {
+        "id": "case-study",
+        "name": "Case Study",
+        "description": "Uses detailed real or fictional cases to illustrate concepts"
+    },
+    {
+        "id": "minimalistic",
+        "name": "Minimalistic",
+        "description": "Very clean, sparse writing with only the essential information"
+    }
+]

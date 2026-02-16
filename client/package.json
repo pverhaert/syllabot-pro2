@@ -1,0 +1,24 @@
+{
+    "name": "syllabot-pro-client",
+    "version": "1.0.0",
+    "private": true,
+    "type": "module",
+    "scripts": {
+        "dev": "vite",
+        "build": "vite build",
+        "preview": "vite preview"
+    },
+    "dependencies": {
+        "dompurify": "^3.3.1",
+        "lucide": "^0.563.0",
+        "marked": "^15.0.6",
+        "mermaid": "^11.12.2",
+        "socket.io-client": "^4.8.1"
+    },
+    "devDependencies": {
+        "@tailwindcss/vite": "^4.0.7",
+        "tailwindcss": "^4.0.7",
+        "typescript": "^5.7.3",
+        "vite": "^6.1.0"
+    }
+}
