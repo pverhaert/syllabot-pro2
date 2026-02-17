@@ -231,7 +231,9 @@ ${chapter.content.substring(0, 10000)}
         const correctLetter = String.fromCharCode(65 + (q.correctAnswerIndex || 0));
         md += `\n**${labels.answer || 'Answer'}: ${correctLetter}**`;
         if (q.explanation) {
-            md += `\n\n**${labels.explanation || 'Explanation'}:** ${q.explanation}`;
+            // Check if explanation starts with a code block
+            const explanationPrefix = q.explanation.trim().startsWith('```') ? '\n\n' : ' ';
+            md += `\n\n**${labels.explanation || 'Explanation'}:**${explanationPrefix}${q.explanation}`;
         }
         md += `\n\n`;
         return md;

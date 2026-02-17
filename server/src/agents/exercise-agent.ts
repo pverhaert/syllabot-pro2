@@ -223,10 +223,14 @@ ${chapter.content.substring(0, 10000)}
 
         let md = `### ${labels.item || 'Exercise'} ${index} ${stars}\n\n${ex.question}\n\n`;
         if (ex.solution) {
-            md += `**${labels.solution || 'Solution'}:** ${ex.solution}\n\n`;
+            // Check if solution starts with a code block
+            const solutionPrefix = ex.solution.trim().startsWith('```') ? '\n\n' : ' ';
+            md += `**${labels.solution || 'Solution'}:**${solutionPrefix}${ex.solution}\n\n`;
         }
         if (ex.why) {
-            md += `**${labels.why || 'Why'}:** ${ex.why}\n\n`;
+            // Check if why starts with a code block
+            const whyPrefix = ex.why.trim().startsWith('```') ? '\n\n' : ' ';
+            md += `**${labels.why || 'Why'}:**${whyPrefix}${ex.why}\n\n`;
         }
         return md;
     }
