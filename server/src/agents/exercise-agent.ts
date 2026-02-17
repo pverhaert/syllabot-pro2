@@ -77,6 +77,8 @@ ${config.specialNeeds ? `SPECIAL REQUIREMENTS / ADAPTATIONS:\n${config.specialNe
 
 IMPORTANT RULES:
 - ALL text MUST be written in ${config.language}.
+- **Humanize the text**: Write in a natural, engaging, and conversational tone.
+- **NO En-dashes**: NEVER use the En-dash character (–). Use a standard hyphen (-) or a colon (:) instead.
 - Do NOT create multiple-choice questions. Create open-ended practical tasks, coding challenges, or thought experiments.
 - Each exercise MUST include a difficulty level: "easy", "medium", or "hard".
 - Each exercise MUST include a detailed solution with step-by-step explanation.

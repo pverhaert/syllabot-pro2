@@ -113,6 +113,8 @@ ${config.mermaidDiagrams ? `- Use colorful Mermaid diagrams/charts (wrapped in \
 - CRITICAL: When writing Mermaid code, ALWAYS wrap node labels in double quotes (e.g. \`id["Label (with text)"]\`) to prevent syntax errors with special characters.` : '- Do NOT use Mermaid diagrams.'}
 
 STYLE GUIDELINES:
+- **Humanize the text**: Write in a natural, engaging, and conversational tone. Avoid robotic or overly formal language. Use varied sentence structures and active voice where possible.
+- **NO En-dashes**: NEVER use the En-dash character (–). Use a standard hyphen (-) or a colon (:) instead.
 - Do NOT use HTML <details> and <summary> tags. Use standard Markdown headings or blockquotes for "Deep Dive" sections.
 - Use **Markdown Tables** to compare concepts or list features.
 - Use **Blockquotes** (>) for important facts, tips, or warnings.

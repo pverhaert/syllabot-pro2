@@ -49,6 +49,8 @@ ${config.specialNeeds ? `SPECIAL REQUIREMENTS / ADAPTATIONS:\n${config.specialNe
 
 IMPORTANT RULES:
 - ALL text MUST be written in ${config.language}.
+- **Humanize the text**: Write in a natural, engaging, and conversational tone.
+- **NO En-dashes**: NEVER use the En-dash character (–). Use a standard hyphen (-) or a colon (:) instead.
 - Each question MUST have exactly 6 answer options (A through F).
 - Only ONE option should be the correct answer.
 - The correctAnswerIndex is the zero-based index of the correct option (0=A, 1=B, 2=C, 3=D, 4=E, 5=F).
