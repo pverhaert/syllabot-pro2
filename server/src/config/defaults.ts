@@ -6,9 +6,10 @@ export interface CourseDefaults {
     quizQuestionsPerChapter: number;
     writingStyle: string;
     demoMode: boolean;
+    demoModeChapters: number;
 }
 
-const defaults: CourseDefaults = {
+const defaults: Omit<CourseDefaults, 'demoModeChapters'> = {
     language: 'English',
     minChapters: 8,
     wordsPerChapter: 3000,
@@ -19,7 +20,10 @@ const defaults: CourseDefaults = {
 };
 
 export function getDefaults(): CourseDefaults {
-    return { ...defaults };
+    return { 
+        ...defaults,
+        demoModeChapters: Number(process.env.DEMO_MODE_CHAPTERS) || 3
+    };
 }
 
 export const availableLanguages = [

@@ -1,18 +1,19 @@
-import express from 'express';
-import { createServer } from 'http';
-import { Server as SocketIOServer } from 'socket.io';
-import cors from 'cors';
+import dotenv from 'dotenv';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import dotenv from 'dotenv';
-import { apiRouter } from './routes/api.js';
-import { registerSocketHandlers } from './routes/socket-handlers.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load .env from project root (server/../.env)
 dotenv.config({ path: path.join(__dirname, '../../.env') });
+
+import express from 'express';
+import { createServer } from 'http';
+import { Server as SocketIOServer } from 'socket.io';
+import cors from 'cors';
+import { apiRouter } from './routes/api.js';
+import { registerSocketHandlers } from './routes/socket-handlers.js';
 
 const PORT = process.env.SERVER_PORT || 3001;
 

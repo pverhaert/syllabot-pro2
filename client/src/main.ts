@@ -34,6 +34,7 @@ interface AppConfig {
         writingStyle: string;
         writingStyles?: StyleEntry[]; // Added for convenience
         demoMode: boolean;
+        demoModeChapters: number;
     };
     hasTavilyKey?: boolean;
 }
@@ -85,6 +86,7 @@ const updateToggleExplanations = () => {
 
 // ── Instances ──
 const ui = new UI();
+let appConfig: AppConfig | null = null;
 
 // ── Initialize ──
 async function init() {
@@ -94,8 +96,8 @@ async function init() {
     // Load config from server
     try {
         const res = await fetch('/api/config');
-        const config: AppConfig = await res.json();
-        populateForm(config);
+        appConfig = await res.json();
+        if (appConfig) populateForm(appConfig);
 
         // Load settings from local storage after population
         loadSettings();
@@ -220,8 +222,9 @@ async function init() {
         }
 
         const isDemoMode = demoToggle.dataset.active === 'true';
-        const chaptersToGenerate = isDemoMode ? outline.chapters.slice(0, 3) : outline.chapters;
-        console.log(`Starting generation for: ${courseId} (${isDemoMode ? 'DEMO — 3 chapters' : `full — ${chaptersToGenerate.length} chapters`})`);
+        const demoLimit = appConfig?.defaults.demoModeChapters || 3;
+        const chaptersToGenerate = isDemoMode ? outline.chapters.slice(0, demoLimit) : outline.chapters;
+        console.log(`Starting generation for: ${courseId} (${isDemoMode ? `DEMO — ${demoLimit} chapters` : `full — ${chaptersToGenerate.length} chapters`})`);
 
         // Iterate chapters and trigger generation
         for (const chapter of chaptersToGenerate) {
@@ -396,6 +399,12 @@ function populateForm(config: AppConfig) {
 
     styleSelect.addEventListener('change', updateStyleExplanation);
     updateStyleExplanation();
+
+    // Set demo chapters count in explanation text
+    const demoCountEl = document.getElementById('demo-chapters-count');
+    if (demoCountEl) {
+        demoCountEl.innerText = String(config.defaults.demoModeChapters || 3);
+    }
 }
 
 // ── Local Storage & Reset ──

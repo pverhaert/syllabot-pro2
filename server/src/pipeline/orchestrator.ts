@@ -207,10 +207,12 @@ export class CourseOrchestrator {
 
             md += `### Exercise ${i + 1} ${stars}\n\n${ex.question}\n\n`;
             if (ex.solution) {
-                md += `**Solution:** ${ex.solution}\n\n`;
+                const solutionPrefix = ex.solution.trim().startsWith('```') ? '\n\n' : ' ';
+                md += `**Solution:**${solutionPrefix}${ex.solution}\n\n`;
             }
             if (ex.why) {
-                md += `**Why:** ${ex.why}\n\n`;
+                const whyPrefix = ex.why.trim().startsWith('```') ? '\n\n' : ' ';
+                md += `**Why:**${whyPrefix}${ex.why}\n\n`;
             }
         });
         return md;
@@ -227,7 +229,8 @@ export class CourseOrchestrator {
             const correctLetter = String.fromCharCode(65 + (q.correctAnswerIndex || 0));
             md += `\n**Answer: ${correctLetter}**`;
             if (q.explanation) {
-                md += `\n\n**Explanation:** ${q.explanation}`;
+                const explanationPrefix = q.explanation.trim().startsWith('```') ? '\n\n' : ' ';
+                md += `\n\n**Explanation:**${explanationPrefix}${q.explanation}`;
             }
             md += `\n\n`;
         });
