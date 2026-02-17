@@ -291,19 +291,31 @@ function populateForm(config: AppConfig) {
         .join('');
 
     // Models (grouped by provider)
-    let modelOptions = '<optgroup label="── Gemini ──">';
-    for (const m of config.models.gemini) {
-        modelOptions += `<option value="gemini:${m.id}" ${m.default ? 'selected' : ''}>${m.name}</option>`;
+    let modelOptions = '';
+    
+    if (config.models.gemini && config.models.gemini.length > 0) {
+        modelOptions += '<optgroup label="── Gemini ──">';
+        for (const m of config.models.gemini) {
+            modelOptions += `<option value="gemini:${m.id}" ${m.default ? 'selected' : ''}>${m.name}</option>`;
+        }
+        modelOptions += '</optgroup>';
     }
-    modelOptions += '</optgroup><optgroup label="── OpenRouter ──">';
-    for (const m of config.models.openrouter) {
-        modelOptions += `<option value="openrouter:${m.id}">${m.name}</option>`;
+
+    if (config.models.openrouter && config.models.openrouter.length > 0) {
+        modelOptions += '<optgroup label="── OpenRouter ──">';
+        for (const m of config.models.openrouter) {
+            modelOptions += `<option value="openrouter:${m.id}">${m.name}</option>`;
+        }
+        modelOptions += '</optgroup>';
     }
-    modelOptions += '</optgroup><optgroup label="── Groq ──">';
-    for (const m of config.models.groq) {
-        modelOptions += `<option value="groq:${m.id}">${m.name}</option>`;
+
+    if (config.models.groq && config.models.groq.length > 0) {
+        modelOptions += '<optgroup label="── Groq ──">';
+        for (const m of config.models.groq) {
+            modelOptions += `<option value="groq:${m.id}">${m.name}</option>`;
+        }
+        modelOptions += '</optgroup>';
     }
-    modelOptions += '</optgroup>';
 
     if (config.models.cerebras && config.models.cerebras.length > 0) {
         modelOptions += '<optgroup label="── Cerebras ──">';
@@ -312,6 +324,11 @@ function populateForm(config: AppConfig) {
         }
         modelOptions += '</optgroup>';
     }
+    
+    if (modelOptions === '') {
+        modelOptions = '<option value="" disabled selected>No models available. Check API keys.</option>';
+    }
+    
     modelSelect.innerHTML = modelOptions;
 
     // Search Grounding Visibility Logic

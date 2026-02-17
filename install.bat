@@ -116,7 +116,8 @@ exit /b 1
 
 :CreateEnv
 echo Found .env.example file.
-set /p CREATE_ENV="Create .env file from .env.example? [Y/N]: "
+set "CREATE_ENV=Y"
+set /p CREATE_ENV="Create .env file from .env.example? [Y/n]: "
 if /I "!CREATE_ENV!" NEQ "Y" goto :EnvDeclined
 
 copy ".env.example" ".env" >nul
@@ -142,8 +143,8 @@ echo.
 echo The .env file will now open in Notepad.
 echo Replace the placeholder values with your actual API keys.
 echo.
-echo Press any key to open .env in notepad...
-pause >nul
+echo After you have saved and closed Notepad,
+pause
 notepad ".env"
 echo [%date% %time%] Created .env from example >> "%LOG_FILE%"
 goto :EnvExists
@@ -267,7 +268,7 @@ echo.
 echo You can now run the application using 'run.bat'.
 echo.
 
-[%date% %time%] Installation completed >> "%LOG_FILE%"
+echo [%date% %time%] Installation completed >> "%LOG_FILE%"
 pause
 exit /b 0
 
@@ -276,7 +277,7 @@ echo %RED%ERROR: package.json not found!%RESET%
 echo Please run this script from the SyllaBot_pro_js directory.
 echo Current directory: %CD%
 
-[%date% %time%] ERROR: Wrong directory >> "%LOG_FILE%"
+echo [%date% %time%] ERROR: Wrong directory >> "%LOG_FILE%"
 pause
 exit /b 1
 
@@ -287,20 +288,20 @@ echo.
 echo Please install Node.js from: https://nodejs.org/
 echo After installation, restart this script.
 
-[%date% %time%] ERROR: Node.js not found >> "%LOG_FILE%"
+echo [%date% %time%] ERROR: Node.js not found >> "%LOG_FILE%"
 pause
 exit /b 1
 
 :NpmMissing
 echo %RED%ERROR: npm is not installed!%RESET%
 
-[%date% %time%] ERROR: npm not found >> "%LOG_FILE%"
+echo [%date% %time%] ERROR: npm not found >> "%LOG_FILE%"
 pause
 exit /b 1
 
 :InstallFail
 echo %RED%Failed to install dependencies%RESET%
 
-[%date% %time%] ERROR: npm install failed >> "%LOG_FILE%"
+echo [%date% %time%] ERROR: npm install failed >> "%LOG_FILE%"
 pause
 exit /b 1
