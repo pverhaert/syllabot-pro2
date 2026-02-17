@@ -1,6 +1,6 @@
-# SyllaBot Pro^2^
+# SyllaBot Pro<sup>2</sup>
 
-**SyllaBot Pro^2^** is an advanced AI-powered course generator designed to create comprehensive educational material on any topic.
+**SyllaBot Pro<sup>2</sup>** is an advanced AI-powered course generator designed to create comprehensive educational material on any topic.
 
 It uses Large Language Models (LLMs) to generate structured course outlines, detailed chapters, quizzes, and exercises. The system is built with a real-time, streaming architecture to provide immediate feedback as content is generated.
 
