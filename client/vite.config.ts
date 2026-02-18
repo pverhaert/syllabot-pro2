@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
         plugins: [tailwindcss()],
         server: {
             port: clientPort,
-            open: true, // Auto-open browser
+            open: false, // Handled by run.bat to ensure backend is ready
             proxy: {
                 '/api': `http://localhost:${serverPort}`,
                 '/history-files': `http://localhost:${serverPort}`,

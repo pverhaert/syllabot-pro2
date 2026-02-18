@@ -6,9 +6,5 @@
     {
         "id": "gpt-oss-120b",
         "name": "GPT-OSS-120B"
-    },
-    {
-        "id": "zai-glm-4.7",
-        "name": "ZAI GLM 4.7"
     }
 ]

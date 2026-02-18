@@ -18,7 +18,20 @@ import {
     RefreshCw,
     FileDown,
     Trash2,
-    ArrowUp
+    ArrowUp,
+    Search,
+    Info,
+    AlertTriangle,
+    Check,
+    FileText,
+    FileBadge,
+    Download,
+    FileCode,
+    Globe,
+    LayoutTemplate,
+    ExternalLink,
+    Zap,
+    BookOpen
     // @ts-ignore
 } from 'lucide/dist/cjs/lucide.js';
 
@@ -42,7 +55,20 @@ const icons = {
     RefreshCw,
     FileDown,
     Trash2,
-    ArrowUp
+    ArrowUp,
+    Search,
+    Info,
+    AlertTriangle,
+    Check,
+    FileText,
+    FileBadge,
+    Download,
+    FileCode,
+    Globe,
+    LayoutTemplate,
+    ExternalLink,
+    Zap,
+    BookOpen
 };
 
 /**

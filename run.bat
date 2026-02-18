@@ -127,16 +127,9 @@ echo ========================================================
 echo.
 echo [%date% %time%] Starting application >> "%LOG_FILE%"
 
-:: Offer to open browser
-set /p OPEN_BROWSER="Open browser automatically when ready? [Y/N]: "
-
-if /I "!OPEN_BROWSER!" EQU "Y" (
-    :: Start the dev server in background and wait a bit, then open browser
-    echo Starting servers...
-    timeout /t 3 >nul
-    start "" http://localhost:%CLIENT_PORT%
-    echo [%date% %time%] Browser launched >> "%LOG_FILE%"
-)
+:: Start the background browser opener (waits for servers to be fully ready)
+echo %BLUE%Waiting for servers to be ready...%RESET%
+start /min "" powershell -WindowStyle Hidden -Command "$sPort = %SERVER_PORT%; $cPort = %CLIENT_PORT%; for ($i=0; $i -lt 60; $i++) { $clientReady = netstat -ano | findstr LISTENING | findstr \":$cPort\"; $serverReady = $false; try { $resp = Invoke-WebRequest -Uri \"http://localhost:$sPort/api/config\" -UseBasicParsing -TimeoutSec 2; if ($resp.StatusCode -eq 200) { $serverReady = $true } } catch { $serverReady = $false }; if ($clientReady -and $serverReady) { Start-Sleep -s 3; Start-Process \"http://localhost:$cPort\"; break }; Start-Sleep -s 1 }"
 
 echo.
 echo %YELLOW%Press Ctrl+C to stop the application%RESET%
@@ -149,8 +142,6 @@ call npm run dev
 echo.
 echo [%date% %time%] Application stopped >> "%LOG_FILE%"
 echo %YELLOW%SyllaBot Pro^2 has stopped.%RESET%
-echo.
-pause
 exit /b 0
 
 :WrongDir

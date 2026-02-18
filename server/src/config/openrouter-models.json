@@ -20,16 +20,12 @@
         "name": "Random Free Model Selected By OpenRouter"
     },
     {
-        "id": "google/gemini-3-pro-preview",
-        "name": "Gemini 3.0 pro preview"
-    },
-    {
         "id": "google/gemini-3-flash-preview",
         "name": "Gemini 3.0 flash preview"
     },
     {
-        "id": "google/gemini-2.5-pro",
-        "name": "Gemini 2.5 Pro"
+        "id": "google/gemini-3-pro-preview",
+        "name": "Gemini 3.0 pro preview"
     },
     {
         "id": "google/gemini-2.5-flash",
@@ -38,6 +34,14 @@
     {
         "id": "google/gemini-2.5-flash-lite",
         "name": "Gemini 2.5 Flash Lite"
+    },
+    {
+        "id": "google/gemini-2.5-pro",
+        "name": "Gemini 2.5 Pro"
+    },
+    {
+        "id": "qwen/qwen3.5-397b-a17b",
+        "name": "Qwen 3.5 397b A17b"
     },
     {
         "id": "deepseek/deepseek-v3.2",
@@ -56,12 +60,12 @@
         "name": "Mistral small creative"
     },
     {
-        "id": "anthropic/claude-sonnet-4",
-        "name": "Claude Sonnet 4"
+        "id": "anthropic/claude-sonnet-4.6",
+        "name": "Claude Sonnet 4.6"
     },
     {
-        "id": "anthropic/claude-3.5-sonnet",
-        "name": "Claude 3.5 Sonnet"
+        "id": "anthropic/claude-sonnet-4.5",
+        "name": "Claude Sonnet 4.5"
     },
     {
         "id": "openai/gpt-5.2-chat",
