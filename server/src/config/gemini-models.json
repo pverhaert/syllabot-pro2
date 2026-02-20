@@ -4,6 +4,10 @@
         "name": "Gemini 3.0 Flash"
     },
     {
+        "id": "gemini-3.1-pro-preview",
+        "name": "Gemini 3.1 Pro"
+    },
+    {
         "id": "gemini-3-pro-preview",
         "name": "Gemini 3.0 Pro"
     },
