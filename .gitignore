@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+
+# Environment
+.env
+.env*.local
+
+# Logs
+*.log
+
+# Server temporary files
+server/history/
+server/temp/
+server/test.mmd
+server/test.png
+
+# Generated Data (keep templates!)
+data/courses/
+data/history/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db

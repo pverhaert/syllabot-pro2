@@ -1,0 +1,10 @@
+[
+    {
+        "id": "llama-3.3-70b",
+        "name": "Llama 3.3 70B"
+    },
+    {
+        "id": "gpt-oss-120b",
+        "name": "GPT-OSS-120B"
+    }
+]
