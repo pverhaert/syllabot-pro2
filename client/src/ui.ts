@@ -223,6 +223,10 @@ export class UI {
                         <i data-lucide="clock" class="w-3 h-3"></i>
                         Pending
                     </span>
+                    <button id="btn-recreate-${chapter.id}" class="hidden items-center gap-1.5 px-3 py-1 ml-2 rounded text-xs font-semibold bg-primary/10 text-primary border border-primary/20 hover:bg-primary/20 transition-colors uppercase tracking-wide cursor-pointer" title="Regenerate this chapter" onclick="document.dispatchEvent(new CustomEvent('course:retry', { detail: { chapterId: '${chapter.id}', courseId: '${this.currentCourseId}' } }))">
+                        <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                        Recreate
+                    </button>
                 </div>
                 <h2 class="text-2xl font-bold text-text mb-6 pb-4 border-b border-border/50">${chapter.title}</h2>
                 <div id="content-${chapter.id}" class="chapter-prose prose prose-invert max-w-none text-text leading-relaxed" data-raw=""></div>
@@ -274,46 +278,8 @@ export class UI {
         this.activeChapterId = chapterId;
     }
 
-    private renderChapterCard(chapter: Chapter) {
-        // Status indicators
-        const statusColors = {
-            pending: 'border-border bg-surface/50',
-            generating: 'border-blue-500/50 bg-blue-500/5 shadow-[0_0_15px_rgba(59,130,246,0.1)]',
-            completed: 'border-success/50 bg-success/5',
-            failed: 'border-error/50 bg-error/5'
-        };
 
-        return `
-            <div id="card-${chapter.id}" class="group relative border rounded-xl p-5 transition-all duration-300 ${statusColors[chapter.status]}">
-                <div class="flex items-start justify-between gap-4">
-                    <div class="flex-1">
-                        <div class="flex items-center gap-3 mb-1">
-                            <span class="flex items-center gap-1.5 text-xs font-mono text-text-muted/70 uppercase tracking-wider">
-                                <i data-lucide="book" class="w-3 h-3"></i>
-                                Chapter ${chapter.order}
-                            </span>
-                            <span id="status-${chapter.id}" class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-surface-alt border border-border uppercase tracking-wide opacity-70">
-                                <i data-lucide="clock" class="w-3 h-3"></i>
-                                ${chapter.status}
-                            </span>
-                        </div>
-                        <h3 class="text-lg font-semibold text-text group-hover:text-primary transition-colors">${chapter.title || 'Untitled'}</h3>
-                        <p class="text-sm text-text-muted mt-1 leading-relaxed">${chapter.description || ''}</p>
-                    </div>
-                    <button class="chapter-toggle p-1.5 text-text-muted hover:text-text rounded-lg hover:bg-surface-hover transition-all cursor-pointer" data-target="content-${chapter.id}" aria-label="Toggle chapter content" aria-expanded="false">
-                        <i data-lucide="chevron-down" class="w-5 h-5 transition-transform duration-200"></i>
-                    </button>
-                </div>
-                
-                <!-- Content area (hidden/collapsed by default) -->
-                <div id="content-${chapter.id}" class="chapter-content hidden mt-4 pt-4 border-t border-border/50" data-raw="">
-                    <!-- Streamed content goes here -->
-                </div>
-            </div>
-        `;
-    }
-
-    updateChapterStatus(chapterId: string, status: Chapter['status']) {
+    updateChapterStatus(chapterId: string, status: Chapter['status'], sectionFailures?: string[]) {
         const item = document.getElementById(`sidebar-item-${chapterId}`);
         const iconContainer = document.getElementById(`status-icon-${chapterId}`);
         const badge = document.getElementById(`status-badge-${chapterId}`);
@@ -322,13 +288,34 @@ export class UI {
             let iconName = 'circle';
             let iconClass = 'text-text-muted/30';
 
+            const btnRecreate = document.getElementById(`btn-recreate-${chapterId}`);
+            const hasPartialFailure = sectionFailures && sectionFailures.length > 0;
+
             if (status === 'generating') {
                 iconName = 'loader-2';
                 iconClass = 'text-blue-500 animate-spin';
                 this.switchChapter(chapterId); // Auto-switch to generating chapter
+
+                if (btnRecreate) {
+                    btnRecreate.classList.remove('flex');
+                    btnRecreate.classList.add('hidden');
+                }
+
+                // Clear existing content & raw data
+                const contentArea = document.getElementById(`content-${chapterId}`);
+                if (contentArea) {
+                    contentArea.innerHTML = '';
+                    contentArea.setAttribute('data-raw', '');
+                }
             } else if (status === 'completed') {
-                iconName = 'check-circle-2';
-                iconClass = 'text-success';
+                // Use amber warning icon if one or more sections failed
+                iconName = hasPartialFailure ? 'alert-triangle' : 'check-circle-2';
+                iconClass = hasPartialFailure ? 'text-amber-500' : 'text-success';
+
+                if (btnRecreate) {
+                    btnRecreate.classList.remove('hidden');
+                    btnRecreate.classList.add('flex');
+                }
 
                 // Render markdown
                 const contentArea = document.getElementById(`content-${chapterId}`);
@@ -341,6 +328,12 @@ export class UI {
                             contentArea.innerHTML = html;
                             // Re-render icons for new content
                             renderIcons(contentArea);
+                            // Re-add section retry banners after markdown replaced innerHTML
+                            if (hasPartialFailure && sectionFailures) {
+                                for (const section of sectionFailures) {
+                                    this.showSectionRetry(chapterId, section as 'exercises' | 'quiz');
+                                }
+                            }
                         })();
                     } catch (e) {
                         console.warn('Markdown parse error:', e);
@@ -349,6 +342,11 @@ export class UI {
             } else if (status === 'failed') {
                 iconName = 'alert-circle';
                 iconClass = 'text-red-500';
+
+                if (btnRecreate) {
+                    btnRecreate.classList.remove('flex');
+                    btnRecreate.classList.add('hidden');
+                }
 
                 // Add retry button in content area
                 const contentArea = document.getElementById(`content-${chapterId}`);
@@ -379,17 +377,84 @@ export class UI {
 
         // Update Badge
         if (badge) {
+            const hasPartialFailure = sectionFailures && sectionFailures.length > 0;
             if (status === 'generating') {
                 badge.className = 'ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-500 text-xs normal-case tracking-normal';
                 badge.innerHTML = `<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> Generating...`;
+            } else if (status === 'completed' && hasPartialFailure) {
+                badge.className = 'ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-500 text-xs normal-case tracking-normal cursor-pointer hover:bg-amber-500/20 transition-colors';
+                // Find which section failed to create the anchor target
+                const firstFailed = sectionFailures![0];
+                const anchorId = `section-retry-${chapterId}-${firstFailed}`;
+                badge.innerHTML = `<i data-lucide="alert-triangle" class="w-3 h-3"></i> Partial`;
+                badge.onclick = () => {
+                    const target = document.getElementById(anchorId);
+                    if (target) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                };
+                badge.title = 'Click to scroll to failed section';
             } else if (status === 'completed') {
                 badge.className = 'ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 text-green-500 text-xs normal-case tracking-normal';
                 badge.innerHTML = `<i data-lucide="check-circle-2" class="w-3 h-3"></i> Completed`;
+                badge.onclick = null;
+                badge.title = '';
             } else if (status === 'failed') {
                 badge.className = 'ml-auto inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-red-500/10 text-red-500 text-xs normal-case tracking-normal';
                 badge.innerHTML = `<i data-lucide="alert-circle" class="w-3 h-3"></i> Failed`;
+                badge.onclick = null;
+                badge.title = '';
             }
             renderIcons(badge);
+        }
+    }
+
+    showSectionRetry(chapterId: string, section: 'exercises' | 'quiz') {
+        const contentArea = document.getElementById(`content-${chapterId}`);
+        if (!contentArea) return;
+
+        // Avoid duplicate banners for the same section
+        const bannerId = `section-retry-${chapterId}-${section}`;
+        if (document.getElementById(bannerId)) return;
+
+        const label = section === 'exercises' ? 'Exercises' : 'Quiz';
+        const courseId = this.currentCourseId;
+
+        const banner = document.createElement('div');
+        banner.id = bannerId;
+        banner.className = 'mt-4 p-4 border border-amber-500/20 bg-amber-500/5 rounded-lg flex items-center gap-3';
+        banner.innerHTML = `
+            <i data-lucide="alert-triangle" class="w-5 h-5 text-amber-500 shrink-0"></i>
+            <span class="text-sm text-amber-600 dark:text-amber-400 flex-1">${label} generation failed.</span>
+            <button class="btn-section-retry px-3 py-1.5 bg-amber-500 text-white text-xs font-medium rounded hover:bg-amber-600 transition-colors cursor-pointer">
+                Retry ${label}
+            </button>
+        `;
+
+        // Use addEventListener instead of inline onclick to avoid HTML escaping issues
+        const retryBtn = banner.querySelector('.btn-section-retry') as HTMLButtonElement;
+        if (retryBtn) {
+            retryBtn.addEventListener('click', () => {
+                retryBtn.disabled = true;
+                retryBtn.textContent = 'Retrying...';
+                document.dispatchEvent(new CustomEvent('course:retry-section', {
+                    detail: { chapterId, courseId, section }
+                }));
+            });
+        }
+
+        contentArea.appendChild(banner);
+        renderIcons(banner);
+    }
+
+    clearSectionRetry(chapterId: string, section: 'exercises' | 'quiz') {
+        const bannerId = `section-retry-${chapterId}-${section}`;
+        const banner = document.getElementById(bannerId);
+        if (banner) banner.remove();
+
+        // If no more section banners remain for this chapter, update badge to completed
+        const exerciseBanner = document.getElementById(`section-retry-${chapterId}-exercises`);
+        const quizBanner = document.getElementById(`section-retry-${chapterId}-quiz`);
+        if (!exerciseBanner && !quizBanner) {
+            this.updateChapterStatus(chapterId, 'completed');
         }
     }
 
@@ -457,29 +522,30 @@ export class UI {
 
             area.classList.remove('hidden');
             area.innerHTML = `
-                <div class="p-4 text-center bg-surface border border-border rounded-xl animate-in fade-in slide-in-from-bottom-2">
-                     <div class="w-10 h-10 bg-success/10 text-success rounded-full flex items-center justify-center mx-auto mb-2">
-                        <i data-lucide="check" class="w-5 h-5"></i>
+                <div class="p-3 bg-surface border border-border rounded-xl animate-in fade-in slide-in-from-bottom-2">
+                     <div class="flex items-center gap-2 mb-2">
+                        <div class="w-6 h-6 bg-success/10 text-success rounded-full flex items-center justify-center shrink-0">
+                            <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                        </div>
+                        <span class="text-sm font-bold">Course Completed!</span>
                      </div>
-                     <h3 class="text-sm font-bold mb-1">Course Completed!</h3>
-                     <p class="text-xs text-text-muted mb-4">All chapters generated.</p>
                      
-                     <div class="flex flex-col gap-2">
+                     <div class="flex gap-1.5 mb-1.5">
                         <button id="btn-download-default" 
-                            class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg shadow-sm transition-all active:scale-[0.97]">
-                            <i data-lucide="file-text" class="w-4 h-4"></i>
-                            Download DOCX
+                            class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium text-white bg-blue-600 hover:bg-blue-500 rounded-lg transition-all active:scale-[0.97]">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                            DOCX
                         </button>
                         <button id="btn-download-tm" 
-                             class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg shadow-sm transition-all active:scale-[0.97]">
-                            <i data-lucide="file-badge" class="w-4 h-4"></i>
-                            Download TM DOCX
-                        </button>
-                        <button id="btn-start-new"
-                            class="w-full flex items-center justify-center gap-2 px-3 py-2 text-xs font-medium text-text bg-surface hover:bg-surface-hover border border-border rounded-lg transition-all">
-                            Start New
+                             class="flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium text-white bg-teal-600 hover:bg-teal-700 rounded-lg transition-all active:scale-[0.97]">
+                            <i data-lucide="file-badge" class="w-3.5 h-3.5"></i>
+                            TM DOCX
                         </button>
                      </div>
+                     <button id="btn-start-new"
+                         class="w-full flex items-center justify-center gap-1.5 px-2 py-1.5 text-[11px] font-medium text-text-muted hover:text-text bg-transparent hover:bg-surface-hover rounded-lg transition-all">
+                         Start New
+                     </button>
                 </div>
             `;
             renderIcons(area);
