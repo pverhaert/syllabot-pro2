@@ -142,6 +142,38 @@ router.post('/chapter', async (req: Request, res: Response) => {
     }
 });
 
+// Retry a single section (exercises or quiz) for an existing chapter
+router.post('/chapter/section', async (req: Request, res: Response) => {
+    try {
+        const { socketId, courseId, chapterId, section } = req.body;
+
+        if (!socketId || !courseId || !chapterId || !section) {
+            return res.status(400).json({ error: 'Missing required fields' });
+        }
+
+        if (section !== 'exercises' && section !== 'quiz') {
+            return res.status(400).json({ error: 'section must be "exercises" or "quiz"' });
+        }
+
+        const io = req.app.get('io') as Server;
+        const socket = io.sockets.sockets.get(socketId);
+
+        if (!socket) {
+            return res.status(404).json({ error: 'Socket not found' });
+        }
+
+        const orchestrator = new CourseOrchestrator(socket, courseId);
+        orchestrator.generateChapterSection(chapterId, section).catch(err => {
+            console.error('Async chapter section generation error:', err);
+        });
+
+        res.json({ success: true, message: `Section "${section}" retry started` });
+    } catch (error: any) {
+        console.error('Chapter section error:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
 // Update outline
 router.post('/course/:id/outline', async (req: Request, res: Response) => {
     try {

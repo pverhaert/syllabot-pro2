@@ -119,7 +119,11 @@ async function init() {
     socket.on('progress:update', (data) => {
         console.log('[Socket] Progress:', data);
         if (data.step === 'chapter') {
-            ui.updateChapterStatus(data.chapterId, data.status);
+            // Skip 'completed' status here — it's handled by 'chapter:completed' event
+            // which includes sectionFailures info for partial failure detection
+            if (data.status !== 'completed') {
+                ui.updateChapterStatus(data.chapterId, data.status);
+            }
         } else if (data.step === 'outline') {
             ui.updateGlobalStatus(data.status === 'completed' ? 'Outline Ready!' : `Generating Outline... (${data.status})`);
             if (data.message) ui.showThinking(data.message);
@@ -136,8 +140,18 @@ async function init() {
         ui.appendChapterContent(data.chapterId, data.chunk);
     });
 
-    socket.on('chapter:completed', (data) => {
-        ui.updateChapterStatus(data.chapter.id, 'completed');
+    socket.on('chapter:completed', (data: any) => {
+        ui.updateChapterStatus(data.chapter.id, 'completed', data.sectionFailures);
+    });
+
+    socket.on('chapter:section-failed', (data: { chapterId: string; section: 'exercises' | 'quiz'; message: string }) => {
+        console.warn(`[Socket] Section failed — chapter ${data.chapterId}, section: ${data.section}:`, data.message);
+        ui.showSectionRetry(data.chapterId, data.section);
+    });
+
+    socket.on('chapter:section-completed', (data: { chapterId: string; section: 'exercises' | 'quiz' }) => {
+        console.log(`[Socket] Section completed — chapter ${data.chapterId}, section: ${data.section}`);
+        ui.clearSectionRetry(data.chapterId, data.section);
     });
 
     socket.on('outline:ready', (data) => {
@@ -260,11 +274,35 @@ async function init() {
         console.log(`Retrying chapter: ${chapterId}`);
         try {
             await generateChapter(courseId, chapterId);
-
-            // Note: global history save is triggered by orchestrator per chapter now, 
-            // so we don't strictly need to call /api/save-history here, but it doesn't hurt.
         } catch (error) {
             // UI update handled in generateChapter
+        }
+    });
+
+    // Handle section-only retry (exercises or quiz)
+    document.addEventListener('course:retry-section', async (e: any) => {
+        const { chapterId, courseId, section } = e.detail;
+        if (!courseId || !chapterId || !section) return;
+
+        console.log(`Retrying section "${section}" for chapter: ${chapterId}`);
+        ui.showThinking(`Retrying ${section} generation for chapter...`);
+
+        try {
+            const res = await fetch('/api/chapter/section', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    socketId: socket.id,
+                    courseId,
+                    chapterId,
+                    section
+                })
+            });
+            const result = await res.json();
+            if (!result.success) throw new Error(result.error);
+        } catch (error: any) {
+            console.error(`Section retry failed (${section}):`, error);
+            ui.showSectionRetry(chapterId, section); // Re-show the retry banner
         }
     });
 
@@ -295,7 +333,7 @@ function populateForm(config: AppConfig) {
 
     // Models (grouped by provider)
     let modelOptions = '';
-    
+
     if (config.models.gemini && config.models.gemini.length > 0) {
         modelOptions += '<optgroup label="── Gemini ──">';
         for (const m of config.models.gemini) {
@@ -327,11 +365,11 @@ function populateForm(config: AppConfig) {
         }
         modelOptions += '</optgroup>';
     }
-    
+
     if (modelOptions === '') {
         modelOptions = '<option value="" disabled selected>No models available. Check API keys.</option>';
     }
-    
+
     modelSelect.innerHTML = modelOptions;
 
     // Search Grounding Visibility Logic

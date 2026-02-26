@@ -128,42 +128,126 @@ export class CourseOrchestrator {
             const writeResult = await writer.run();
             if (!writeResult.success) throw new Error(writeResult.error);
 
+            // Track which sections failed (non-fatal: content was written successfully)
+            const sectionFailures: string[] = [];
+
             // 2. Create Exercises
             if (this.context.config.exercisesPerChapter > 0) {
-                const exerciseAgent = new ExerciseCreatorAgent(this.context);
-                const exResult = await exerciseAgent.run();
-                const exercises = exResult.success && Array.isArray(exResult.data) ? exResult.data : [];
-                if (exercises.length > 0) {
-                    chapter.exercises = exercises;
-                    // Append to content for persistence, but DONT emit (agent already emitted)
-                    const exerciseMd = this.formatExercisesAsMarkdown(exercises);
-                    chapter.content = (chapter.content || '') + exerciseMd;
+                try {
+                    const exerciseAgent = new ExerciseCreatorAgent(this.context);
+                    const exResult = await exerciseAgent.run();
+                    if (!exResult.success) throw new Error(exResult.error || 'Exercise generation failed');
+                    const exercises = Array.isArray(exResult.data) ? exResult.data : [];
+                    if (exercises.length > 0) {
+                        chapter.exercises = exercises;
+                        const exerciseMd = this.formatExercisesAsMarkdown(exercises);
+                        chapter.content = (chapter.content || '') + exerciseMd;
+                    }
+                } catch (exError: any) {
+                    console.error(`[Orchestrator] Exercise generation failed for chapter ${chapterId}:`, exError);
+                    sectionFailures.push('exercises');
+                    this.socket.emit('chapter:section-failed', {
+                        chapterId,
+                        section: 'exercises',
+                        message: exError.message
+                    });
                 }
             }
 
             // 3. Create Quiz
             if (this.context.config.quizQuestionsPerChapter > 0) {
-                const quizAgent = new QuizCreatorAgent(this.context);
-                const qzResult = await quizAgent.run();
-                const quiz = qzResult.success && Array.isArray(qzResult.data) ? qzResult.data : [];
-                if (quiz.length > 0) {
-                    chapter.quiz = quiz;
-                    // Append to content for persistence, but DONT emit (agent already emitted)
-                    const quizMd = this.formatQuizAsMarkdown(quiz);
-                    chapter.content = (chapter.content || '') + quizMd;
+                try {
+                    const quizAgent = new QuizCreatorAgent(this.context);
+                    const qzResult = await quizAgent.run();
+                    if (!qzResult.success) throw new Error(qzResult.error || 'Quiz generation failed');
+                    const quiz = Array.isArray(qzResult.data) ? qzResult.data : [];
+                    if (quiz.length > 0) {
+                        chapter.quiz = quiz;
+                        const quizMd = this.formatQuizAsMarkdown(quiz);
+                        chapter.content = (chapter.content || '') + quizMd;
+                    }
+                } catch (qzError: any) {
+                    console.error(`[Orchestrator] Quiz generation failed for chapter ${chapterId}:`, qzError);
+                    sectionFailures.push('quiz');
+                    this.socket.emit('chapter:section-failed', {
+                        chapterId,
+                        section: 'quiz',
+                        message: qzError.message
+                    });
                 }
             }
 
+            // Mark chapter completed even with partial section failures — content was written
             chapter.status = 'completed';
             await this.saveState();
             await this.saveMarkdownHistory(); // Incremental save
 
-            this.socket.emit('chapter:completed', { chapter });
+            this.socket.emit('chapter:completed', { chapter, sectionFailures });
             this.socket.emit('progress:update', { step: 'chapter', chapterId, status: 'completed' });
 
         } catch (error: any) {
             console.error(`Error generating chapter ${chapterId}:`, error);
             this.socket.emit('error', { message: error.message, chapterId });
+        }
+    }
+
+    async generateChapterSection(chapterId: string, section: 'exercises' | 'quiz') {
+        try {
+            // Load context if needed
+            if (!this.context.outline) {
+                const loaded = await FileStore.loadCourse(this.context.courseId);
+                if (loaded) {
+                    this.context.outline = loaded.outline;
+                    this.context.config = loaded.config;
+                    this.context.courseName = loaded.courseName;
+                    (this.context as any).createdAt = loaded.createdAt;
+                    this.initLLM(loaded.config.provider, loaded.config.modelId);
+                } else {
+                    throw new Error('Course context not found');
+                }
+            }
+
+            this.context.currentChapterId = chapterId;
+            const chapter = this.context.outline!.chapters.find(c => c.id === chapterId);
+            if (!chapter) throw new Error('Chapter not found');
+
+            // NOTE: Do NOT emit progress:update with 'generating' here —
+            // that triggers content clearing on the client, which would wipe the chapter text.
+            this.socket.emit('agent:thinking', {
+                agent: 'Orchestrator',
+                message: `Retrying ${section} for chapter "${chapter.title}"...`
+            });
+
+            if (section === 'exercises') {
+                const exerciseAgent = new ExerciseCreatorAgent(this.context);
+                const exResult = await exerciseAgent.run();
+                if (!exResult.success) throw new Error(exResult.error || 'Exercise generation failed');
+                const exercises = Array.isArray(exResult.data) ? exResult.data : [];
+                if (exercises.length > 0) {
+                    chapter.exercises = exercises;
+                    const exerciseMd = this.formatExercisesAsMarkdown(exercises);
+                    chapter.content = (chapter.content || '') + exerciseMd;
+                }
+            } else if (section === 'quiz') {
+                const quizAgent = new QuizCreatorAgent(this.context);
+                const qzResult = await quizAgent.run();
+                if (!qzResult.success) throw new Error(qzResult.error || 'Quiz generation failed');
+                const quiz = Array.isArray(qzResult.data) ? qzResult.data : [];
+                if (quiz.length > 0) {
+                    chapter.quiz = quiz;
+                    const quizMd = this.formatQuizAsMarkdown(quiz);
+                    chapter.content = (chapter.content || '') + quizMd;
+                }
+            }
+
+            await this.saveState();
+            await this.saveMarkdownHistory();
+
+            this.socket.emit('chapter:section-completed', { chapterId, section });
+
+        } catch (error: any) {
+            console.error(`[Orchestrator] Section retry failed for chapter ${chapterId} section ${section}:`, error);
+            this.socket.emit('chapter:section-failed', { chapterId, section, message: error.message });
         }
     }
 
