@@ -132,3 +132,28 @@ Once finished, click the History button in the bottom left corner.
   - `src/llm/`: Clients for Gemini, OpenRouter, etc.
 - `data/`: Output directory.
   - `history/`: Saved markdown files of generated courses.
+
+---
+
+## Agent Architecture
+
+The **CourseOrchestrator** drives the pipeline in two phases, delegating work to specialized agents that all extend `BaseAgent`.
+
+```mermaid
+flowchart TD
+    Client[Client] <-->|Socket.IO| Orch[CourseOrchestrator]
+
+    subgraph Phase 1 - Outline
+        OA[OutlineCreatorAgent] --> CNA[CourseNameAgent]
+    end
+
+    subgraph Phase 2 - Chapters
+        CW[ChapterWriterAgent] --> EC[ExerciseCreatorAgent] --> QC[QuizCreatorAgent]
+    end
+
+    Orch --> OA
+    Orch --> CW
+
+    OA & CNA & CW & EC & QC -.->|extends| BA[BaseAgent]
+    BA --> LLM[Gemini / OpenRouter / Groq / Cerebras]
+```

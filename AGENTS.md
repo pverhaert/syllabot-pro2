@@ -1,39 +1,62 @@
-# Syllabot Pro 2: Agentic Architecture
+# SyllaBot Pro² – Agent Instructions
 
-Syllabot Pro 2 is built on a multi-agent orchestration architecture designed to automate the creation of high-quality, structured course materials. The system uses specialized AI agents, coordinated by a central orchestrator, to perform distinct tasks within the content generation pipeline.
+This file contains instructions for AI coding agents (e.g. Copilot, Cursor, Antigravity, Codex) working in this repository.
 
-## System Overview
+---
 
-The core of the system is a **Multi-Agent Orchestration** model that leverages Large Language Models (LLMs) from Google Gemini, Groq, Cerebras, and OpenRouter. Each agent is responsible for a specific domain-level task, ensuring that the final course material is coherent, comprehensive, and pedagogically sound.
+## Git & Publishing Rules
 
-## The Core Pipeline
+> **Do NOT push to GitHub automatically.** Always wait until the user explicitly says to push.
 
-The generation process follows a structured workflow:
+Before pushing to GitHub, always complete these steps in order:
 
-1.  **Request & Configuration:** The user provides a topic, target audience, and desired output parameters (number of chapters, exercises, quiz questions, etc.) through the web client.
-2.  **Orchestration:** The `CourseOrchestrator` (Server) initializes the pipeline and manages the lifecycle of each agent.
-3.  **Outline Creation:** The `OutlineCreatorAgent` generates a hierarchical course structure (chapters, sub-chapters, and learning objectives).
-4.  **Course Naming:** The `CourseNameAgent` generates a compelling title for the course based on the topic and generated outline.
-5.  **Content Generation:** For each chapter in the outline, the `ChapterWriterAgent` produces in-depth pedagogical content.
-6.  **Supplementary Material:** Depending on the configuration, the `ExerciseCreatorAgent` and `QuizCreatorAgent` generate interactive components to reinforce learning.
-7.  **Export:** The final structured data is converted into Markdown and Docx formats for user download.
+1. **Update `README.md`** if the changes affect features, setup, usage, or architecture.
+2. **Update `CHANGELOG.md`** with a summary of what changed under the correct version heading.
+3. **Bump the version in `package.json`** following semantic versioning:
+   - Patch release for fixes and small improvements: `1.0.0 → 1.0.1 → 1.0.2 → ...`
+   - Minor release for new features: `1.0.0 → 1.1.0`
+   - Major release for breaking changes: `1.0.0 → 2.0.0`
 
-## Agent Responsibilities
+---
 
-| Agent | Responsibility | Output Format |
+## Project Overview
+
+SyllaBot Pro² is a multi-agent AI system that generates structured course materials. A central **CourseOrchestrator** coordinates specialized agents over a real-time WebSocket connection.
+
+### Tech Stack
+
+- **Frontend:** Vite + TypeScript (`client/`)
+- **Backend:** Node.js + Express + Socket.io (`server/`)
+- **LLM Providers:** Google Gemini (required), OpenRouter, Groq, Cerebras (optional)
+- **Optional:** Tavily AI for web-grounded research
+
+### Agent Pipeline
+
+| Step | Agent | Output |
 | :--- | :--- | :--- |
-| **OutlineCreatorAgent** | Designs the curriculum structure and learning goals. | Structured JSON (CourseOutline) |
-| **CourseNameAgent** | Crafts a creative and relevant title for the course. | Plain Text |
-| **ChapterWriterAgent** | Produces detailed, high-quality educational content. | Markdown |
-| **ExerciseCreatorAgent** | Generates practical exercises based on chapter material. | Structured JSON |
-| **QuizCreatorAgent** | Creates multiple-choice questions for knowledge validation. | Structured JSON |
-| **SummaryAgent** | (Internal) Generates course-wide introductions and conclusions. | Markdown |
+| 1 | `OutlineCreatorAgent` | Structured course outline (JSON) |
+| 2 | `CourseNameAgent` | Short course title (text) |
+| 3 | `ChapterWriterAgent` | Chapter content (Markdown, streamed) |
+| 4 | `ExerciseCreatorAgent` | Practical exercises (JSON) |
+| 5 | `QuizCreatorAgent` | Multiple-choice questions (JSON) |
 
-## Interaction & Feedback
+All agents extend `BaseAgent` (`server/src/agents/base-agent.ts`) and share a `PipelineContext` object containing the LLM client, course config, and a Socket.io emit function.
 
-The system uses **Socket.io** for real-time communication between the server and the client. This allows users to see:
-- **Thinking Logs:** Insights into what each agent is currently processing.
-- **Progress Updates:** Visual feedback as chapters and supplementary materials are completed.
-- **Streaming Content:** Real-time text generation as it happens.
+### Key Files
 
-For more details on implementation, see the `AGENTS.md` files in the [server](./server/AGENTS.md) and [client](./client/AGENTS.md) directories.
+- `server/src/pipeline/orchestrator.ts` — coordinates the full generation pipeline
+- `server/src/agents/` — individual agent implementations
+- `server/src/llm/` — LLM provider clients
+- `client/src/` — frontend UI and WebSocket handling
+- `.env` / `.env.example` — API keys and port configuration (**restart required after any change**)
+
+### Real-Time Communication
+
+The server emits Socket.io events that the client listens to:
+
+- `agent:thinking` — live agent status/logs
+- `outline:ready` — outline has been generated
+- `chapter:completed` — a chapter (with exercises and quiz) is done
+- `progress:update` — step-level progress updates
+
+For more details, see also `server/AGENTS.md` and `client/AGENTS.md`.

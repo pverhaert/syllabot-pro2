@@ -26,17 +26,120 @@ set LOG_FILE=runtime.log
 echo [%date% %time%] Starting SyllaBot Pro2... > "%LOG_FILE%"
 
 :: ============================================================
-:: STEP 1: Verify Working Directory
+:: STEP 1: Check for Updates
 :: ============================================================
-echo %BLUE%[1/4] Checking working directory...%RESET%
+echo %BLUE%[1/5] Checking for updates...%RESET%
+
+:: Verify git is available
+where git >nul 2>&1
+if errorlevel 1 (
+    echo %YELLOW%WARNING: Git is not installed. Skipping update check.%RESET%
+    echo [%date% %time%] Git not found, skipping update check >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+:: Verify this is a git repository
+git rev-parse --git-dir >nul 2>&1
+if errorlevel 1 (
+    echo %YELLOW%WARNING: Not a git repository. Skipping update check.%RESET%
+    echo [%date% %time%] Not a git repo, skipping update check >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+:: Fetch latest from remote
+echo Fetching latest changes from GitHub...
+git fetch origin >nul 2>&1
+if errorlevel 1 (
+    echo %YELLOW%WARNING: Could not reach GitHub. Continuing with local version.%RESET%
+    echo [%date% %time%] Git fetch failed, continuing offline >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+:: Get the current branch name
+for /f "tokens=*" %%b in ('git rev-parse --abbrev-ref HEAD 2^>nul') do set "CURRENT_BRANCH=%%b"
+
+:: Compare local and remote
+for /f "tokens=*" %%a in ('git rev-parse HEAD 2^>nul') do set "LOCAL_HASH=%%a"
+for /f "tokens=*" %%a in ('git rev-parse "origin/%CURRENT_BRANCH%" 2^>nul') do set "REMOTE_HASH=%%a"
+
+if "%LOCAL_HASH%"=="%REMOTE_HASH%" (
+    echo %GREEN%[OK] Already up-to-date%RESET%
+    echo [%date% %time%] Repository is up-to-date >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+:: Determine relationship using merge-base
+for /f "tokens=*" %%a in ('git merge-base HEAD "origin/%CURRENT_BRANCH%" 2^>nul') do set "MERGE_BASE=%%a"
+
+if "%MERGE_BASE%"=="%REMOTE_HASH%" (
+    :: merge-base equals remote => local is ahead of remote
+    echo %GREEN%[OK] Local repo is ahead of remote. No pull needed.%RESET%
+    echo [%date% %time%] Local is ahead of remote, skipping pull >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+if not "%MERGE_BASE%"=="%LOCAL_HASH%" (
+    :: merge-base equals neither => branches have diverged
+    echo %YELLOW%WARNING: Local and remote have diverged. Skipping auto-update.%RESET%
+    echo %YELLOW%         Run 'git pull' manually to resolve.%RESET%
+    echo [%date% %time%] Branches diverged, skipping auto-update >> "%LOG_FILE%"
+    goto :SkipUpdate
+)
+
+:: merge-base equals local => local is behind remote => pull
+
+echo %YELLOW%Updates available! Pulling latest version...%RESET%
+
+:: Save hash of package.json files before pull to detect dependency changes
+set "PKG_CHANGED=0"
+for /f "tokens=*" %%a in ('git rev-parse HEAD:package.json 2^>nul') do set "OLD_ROOT_PKG=%%a"
+for /f "tokens=*" %%a in ('git rev-parse HEAD:server/package.json 2^>nul') do set "OLD_SERVER_PKG=%%a"
+for /f "tokens=*" %%a in ('git rev-parse HEAD:client/package.json 2^>nul') do set "OLD_CLIENT_PKG=%%a"
+
+:: Try to pull (will fail gracefully if there are local changes)
+git pull origin "%CURRENT_BRANCH%" 2>&1 | findstr /I "error CONFLICT" >nul 2>&1
+if not errorlevel 1 (
+    echo %YELLOW%WARNING: Could not pull automatically ^(you may have local changes^).%RESET%
+    echo %YELLOW%         Continuing with your current local version.%RESET%
+    echo [%date% %time%] Git pull failed due to local changes >> "%LOG_FILE%"
+    git merge --abort >nul 2>&1
+    goto :SkipUpdate
+)
+
+echo %GREEN%[OK] Updated to latest version%RESET%
+echo [%date% %time%] Pulled latest version from GitHub >> "%LOG_FILE%"
+
+:: Check if package.json files changed
+for /f "tokens=*" %%a in ('git rev-parse HEAD:package.json 2^>nul') do set "NEW_ROOT_PKG=%%a"
+for /f "tokens=*" %%a in ('git rev-parse HEAD:server/package.json 2^>nul') do set "NEW_SERVER_PKG=%%a"
+for /f "tokens=*" %%a in ('git rev-parse HEAD:client/package.json 2^>nul') do set "NEW_CLIENT_PKG=%%a"
+
+if not "%OLD_ROOT_PKG%"=="%NEW_ROOT_PKG%" set "PKG_CHANGED=1"
+if not "%OLD_SERVER_PKG%"=="%NEW_SERVER_PKG%" set "PKG_CHANGED=1"
+if not "%OLD_CLIENT_PKG%"=="%NEW_CLIENT_PKG%" set "PKG_CHANGED=1"
+
+if "%PKG_CHANGED%"=="1" (
+    echo %YELLOW%Dependencies changed. Installing updates...%RESET%
+    echo [%date% %time%] Dependencies changed, running npm install:all >> "%LOG_FILE%"
+    call npm run install:all
+    echo %GREEN%[OK] Dependencies updated%RESET%
+)
+
+:SkipUpdate
+echo.
+
+:: ============================================================
+:: STEP 2: Verify Working Directory
+:: ============================================================
+echo %BLUE%[2/5] Checking working directory...%RESET%
 if not exist "package.json" goto :WrongDir
 echo %GREEN%[OK] Working directory confirmed%RESET%
 echo.
 
 :: ============================================================
-:: STEP 2: Quick Environment Check
+:: STEP 3: Quick Environment Check
 :: ============================================================
-echo %BLUE%[2/4] Checking environment...%RESET%
+echo %BLUE%[3/5] Checking environment...%RESET%
 
 :: Check Node
 where node >nul 2>&1
@@ -72,9 +175,9 @@ echo %GREEN%[OK] Environment looks good%RESET%
 echo.
 
 :: ============================================================
-:: STEP 3: Check Port Availability
+:: STEP 4: Check Port Availability
 :: ============================================================
-echo %BLUE%[3/4] Checking port availability...%RESET%
+echo %BLUE%[4/5] Checking port availability...%RESET%
 
 :: Read ports from .env if they exist
 set SERVER_PORT=3210
@@ -115,9 +218,9 @@ echo [%date% %time%] Port check completed >> "%LOG_FILE%"
 echo.
 
 :: ============================================================
-:: STEP 4: Start Application
+:: STEP 5: Start Application
 :: ============================================================
-echo %BLUE%[4/4] Starting SyllaBot Pro^2...%RESET%
+echo %BLUE%[5/5] Starting SyllaBot Pro^2...%RESET%
 echo.
 echo ========================================================
 echo   Application will be available at:

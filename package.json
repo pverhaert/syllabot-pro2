@@ -1,6 +1,6 @@
 {
   "name": "syllabot-pro2",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "AI-powered course material generator using Gemini, OpenRouter, Groq and/or Cerebras API",
   "private": true,
   "scripts": {
