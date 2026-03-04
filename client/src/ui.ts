@@ -25,7 +25,7 @@ export class UI {
         });
 
         // Configure Marked with KaTeX math support
-        marked.use(markedKatex({ throwOnError: false }));
+        marked.use(markedKatex({ throwOnError: false, nonStandard: true }));
 
         // Configure Marked for Async Mermaid Rendering via walkTokens
         marked.use({

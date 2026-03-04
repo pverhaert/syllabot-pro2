@@ -14,7 +14,7 @@ mermaid.initialize({
 });
 
 // ── Configure Marked with KaTeX math support ──
-marked.use(markedKatex({ throwOnError: false }));
+marked.use(markedKatex({ throwOnError: false, nonStandard: true }));
 
 // ── Configure Marked with Mermaid support (same as ui.ts) ──
 marked.use({
