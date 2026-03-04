@@ -1,8 +1,11 @@
 import { CourseOutline, Chapter } from './types';
+import 'katex/dist/katex.min.css';
 import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
 import mermaid from 'mermaid';
 
 import { renderIcons } from './icons';
+import { preprocessMath } from './math-utils';
 
 export class UI {
     private app = document.querySelector('#app') as HTMLElement;
@@ -20,6 +23,9 @@ export class UI {
             theme: 'default',
             securityLevel: 'loose',
         });
+
+        // Configure Marked with KaTeX math support
+        marked.use(markedKatex({ throwOnError: false }));
 
         // Configure Marked for Async Mermaid Rendering via walkTokens
         marked.use({
@@ -324,7 +330,7 @@ export class UI {
                     try {
                         // Use async parsing for Mermaid
                         (async () => {
-                            const html = await marked.parse(rawMd, { async: true });
+                            const html = await marked.parse(preprocessMath(rawMd), { async: true });
                             contentArea.innerHTML = html;
                             // Re-render icons for new content
                             renderIcons(contentArea);

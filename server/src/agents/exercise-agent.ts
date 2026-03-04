@@ -88,6 +88,11 @@ IMPORTANT RULES:
   - **ALWAYS** ensure there is a blank line (newline) before starting a code block.
   - **NEVER** place a code block on the same line as text (e.g. INVALID: \`text\`\`\`javascript\`, VALID: \`text\\n\\n\`\`\`javascript\`).
   - **NEVER** output raw HTML tags that are not wrapped in code blocks or backticks, as they will be rendered effectively invisible by the browser.
+- **Math / Formula Formatting Rules:**
+  - When exercises involve mathematical formulas or expressions, you MUST use LaTeX notation.
+  - Use single dollar signs for inline math: \`$a^2 + b^2 = c^2$\`
+  - Use double dollar signs for block-level math on its OWN separate line.
+  - NEVER place $$...$$ inline within a sentence.
 ${config.mermaidDiagrams ? `- You may use colorful Mermaid diagrams/charts (wrapped in \`\`\`mermaid code blocks) in the 'solution' if a visual explanation is specifically helpful for the exercise.
 - CRITICAL: When writing Mermaid code, ALWAYS wrap node labels in double quotes (e.g. \`id["Label"]\`) to prevent syntax errors with special characters.` : '- Do NOT use Mermaid diagrams.'}
 - Each exercise MUST include a "why" field explaining why this exercise is important and what concept it reinforces.

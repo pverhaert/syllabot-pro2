@@ -106,6 +106,18 @@ INSTRUCTIONS:
   - **ALWAYS** ensure there is a blank line (newline) before starting a code block.
   - **NEVER** place a code block on the same line as text (e.g. INVALID: \`text\`\`\`javascript\`, VALID: \`text\\n\\n\`\`\`javascript\`).
   - **NEVER** output raw HTML tags that are not wrapped in code blocks or backticks, as they will be rendered effectively invisible by the browser.
+- **Math / Formula Formatting Rules:**
+  - When the content involves mathematical formulas, equations, or expressions, you MUST use LaTeX notation.
+  - Use single dollar signs for inline math: \`$a^2 + b^2 = c^2$\`
+  - Use double dollar signs for block-level (centered) math on its OWN line:
+    \`\`\`
+    text before
+
+    $$\\sum_{i=1}^{n} x_i$$
+
+    text after
+    \`\`\`
+  - NEVER place $$...$$ inline within a sentence. It MUST be on a separate line.
 ${config.enableSearch ? `- **CRITICAL**: You have been provided with search results. Use them to verify facts and enrich the content.
 - Please append a **"Reference"** or **"Sources"** section at the very end of the chapter if you used any information from the search results.
 - Format citations as bullet points: \`- [Title](URL)\`.` : ''}

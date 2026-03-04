@@ -46,11 +46,11 @@ ${config.specialNeeds ? `SPECIAL REQUIREMENTS:\n${config.specialNeeds}\n` : ''}
 ${researchContext}
 
 The course should be structured logically from beginner to advanced concepts.
-For each chapter, provide a title, a brief description, and a list of 3-7 subtopics/sections to be covered.
+For each chapter, provide a title, a brief description, and a list of 3-10 subtopics/sections to be covered.
 
 IMPORTANT GUIDELINES:
 - **Humanize the text**: Use a natural and engaging tone. Avoid overly robotic or formal academic language.
-- **NO En-dashes**: NEVER use the En-dash character (–). Use a standard hyphen (-) or a colon (:) instead.
+- **NO En-dashes**: NEVER use the em-dash character (—). Use a standard hyphen (-) or a colon (:) instead.
 - The output MUST be valid JSON matching the schema.
 IMPORTANT: Do NOT translate the JSON keys (like "chapters", "title", "description", "subtopics"). Keep them in English. Only translate the values.
 `;
