@@ -61,6 +61,11 @@ IMPORTANT RULES:
   - **ALWAYS** ensure there is a blank line (newline) before starting a code block.
   - **NEVER** place a code block on the same line as text (e.g. INVALID: \`text\`\`\`javascript\`, VALID: \`text\\n\\n\`\`\`javascript\`).
   - **NEVER** output raw HTML tags that are not wrapped in code blocks or backticks, as they will be rendered effectively invisible by the browser.
+- **Math / Formula Formatting Rules:**
+  - When questions involve mathematical formulas or expressions, you MUST use LaTeX notation.
+  - Use single dollar signs for inline math: \`$a^2 + b^2 = c^2$\`
+  - Use double dollar signs for block-level math on its OWN separate line.
+  - NEVER place $$...$$ inline within a sentence.
 - Options should NOT include the letter prefix (A, B, etc.), just the answer text.
 - Output MUST be valid JSON matching the schema.
 

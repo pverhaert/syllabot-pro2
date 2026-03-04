@@ -1,7 +1,10 @@
 import './styles.css';
+import 'katex/dist/katex.min.css';
 import { marked } from 'marked';
+import markedKatex from 'marked-katex-extension';
 import mermaid from 'mermaid';
 import { renderIcons } from './icons';
+import { preprocessMath } from './math-utils';
 
 // ── Initialize Mermaid (same config as ui.ts) ──
 mermaid.initialize({
@@ -9,6 +12,9 @@ mermaid.initialize({
     theme: 'default',
     securityLevel: 'loose',
 });
+
+// ── Configure Marked with KaTeX math support ──
+marked.use(markedKatex({ throwOnError: false }));
 
 // ── Configure Marked with Mermaid support (same as ui.ts) ──
 marked.use({
@@ -60,8 +66,11 @@ async function init() {
 
         const markdown = await response.text();
 
+        // Normalize block math ($$...$$) to be on own lines for KaTeX
+        const processedMarkdown = preprocessMath(markdown);
+
         // Parse with marked (async for mermaid support)
-        const html = await marked.parse(markdown, { async: true });
+        const html = await marked.parse(processedMarkdown, { async: true });
 
         // Inject rendered HTML
         courseBodyEl.innerHTML = html;

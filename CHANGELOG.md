@@ -1,5 +1,23 @@
 # Release Notes
 
+## 1.0.2 (2026-03-04)
+
+### Added
+
+- **LaTeX math rendering** via KaTeX in both the course viewer (`viewer.ts`) and generation UI (`ui.ts`).
+  - Installed `katex` and `marked-katex-extension` packages.
+  - Inline math (`$...$`) and block math (`$$...$$`) now render as proper formatted equations.
+- `math-utils.ts` — preprocessor that normalizes `$$...$$` block math onto separate lines before rendering.
+- LaTeX math formatting instructions added to all content-generating agents (`chapter-agent.ts`, `exercise-agent.ts`, `quiz-agent.ts`).
+- Added **Gemini 3.1 Flash Lite** and **GPT-5.3 Chat** models to the model selection.
+
+### Changed
+
+- Outline agent now allows 3–10 subtopics per chapter (was 3–7).
+- Outline agent prompt corrected to reference em-dash (`—`) instead of en-dash (`–`).
+
+---
+
 ## 1.0.1 (2026-02-26)
 
 ### Added

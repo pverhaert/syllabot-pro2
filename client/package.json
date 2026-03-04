@@ -10,8 +10,10 @@
     },
     "dependencies": {
         "dompurify": "^3.3.1",
+        "katex": "^0.16.33",
         "lucide": "^0.563.0",
         "marked": "^15.0.6",
+        "marked-katex-extension": "^5.1.7",
         "mermaid": "^11.12.2",
         "socket.io-client": "^4.8.1"
     },
