@@ -15,6 +15,7 @@
         "marked": "^15.0.6",
         "marked-katex-extension": "^5.1.7",
         "mermaid": "^11.12.2",
+        "pyodide": "^0.29.3",
         "socket.io-client": "^4.8.1"
     },
     "devDependencies": {

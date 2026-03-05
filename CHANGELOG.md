@@ -1,5 +1,20 @@
 # Release Notes
 
+## 1.0.3 (2026-03-05)
+
+### Added
+
+- **Interactive Code Runners** for Python, JavaScript, TypeScript, HTML, and React directly inside the syllabus viewer.
+  - Python execution runs client-side via Pyodide, supporting Matplotlib rendering and interactive `input()` via JS popups.
+  - HTML runs in a scalable, sandboxed iframe.
+  - React dynamically transpiles and mounts using Babel standalone.
+- JavaScript and TypeScript snippets can now access the DOM context of a preceding HTML playground block.
+- "Run/Preview/Render" functionality attached cleanly to language blocks.
+- Universal "Copy" clipboard buttons attached to the toolbar of every markdown code snippet.
+- Custom styled code output consoles that handle execution errors and `stdout`/`stderr` logging.
+
+---
+
 ## 1.0.2 (2026-03-04)
 
 ### Added
