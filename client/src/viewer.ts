@@ -9,6 +9,7 @@ import { runPythonCode } from './pyodide-runner';
 import { runJavaScriptCode, runTypeScriptCode } from './js-ts-runner';
 import { runHtmlCode } from './html-runner';
 import { runReactCode } from './react-runner';
+import { runP5Code } from './p5-runner';
 
 // ── Initialize Mermaid (same config as ui.ts) ──
 mermaid.initialize({
@@ -309,6 +310,18 @@ function buildTOC() {
             if (mobileToc) mobileToc.open = false;
         });
     });
+
+    // Global listener for p5.js errors from sandboxed iframes
+    window.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'p5-error') {
+            const error = event.data.message || 'Unknown p5.js error';
+            // Find the active/loading code runner and show the error
+            // As a simple fallback, we just log it, but ideally we'd show it in the output area.
+            // Since we can't easily find WHICH runner it came from here without more state,
+            // we'll at least console and could eventually optimize this.
+            console.error('p5.js sandbox error:', error);
+        }
+    });
 }
 
 /**
@@ -363,8 +376,17 @@ function setupCodeRunners() {
         const isTS = codeEl.classList.contains('language-typescript') || codeEl.classList.contains('language-ts');
         const isHTML = codeEl.classList.contains('language-html') || codeEl.classList.contains('language-css');
         const isReact = codeEl.classList.contains('language-jsx') || codeEl.classList.contains('language-tsx') || codeEl.classList.contains('language-react');
+        let isP5 = codeEl.classList.contains('language-p5js') || codeEl.classList.contains('language-p5');
 
-        const isExecutable = isPython || isJS || isTS || isHTML || isReact;
+        // Fallback: If it's labeled as JS but contains p5.js patterns (setup/draw + createCanvas), treat it as p5js
+        if (isJS && !isP5) {
+            const codeText = codeEl.textContent || '';
+            if (codeText.includes('setup()') && (codeText.includes('createCanvas') || codeText.includes('draw()'))) {
+                isP5 = true;
+            }
+        }
+
+        const isExecutable = isPython || isJS || isTS || isHTML || isReact || isP5;
 
         let langName = 'Code';
         let langColor = 'text-gray-400';
@@ -374,6 +396,7 @@ function setupCodeRunners() {
         else if (isJS) { langName = 'JavaScript'; langColor = 'text-[#F7DF1E]'; }
         else if (isHTML) { langName = 'Web Preview'; langColor = 'text-[#E34F26]'; }
         else if (isReact) { langName = 'React'; langColor = 'text-[#61DAFB]'; }
+        else if (isP5) { langName = 'p5.js'; langColor = 'text-[#ED225D]'; }
         else if (languageClass) {
             langName = languageClass.replace('language-', '');
             langName = langName.charAt(0).toUpperCase() + langName.slice(1);
@@ -389,6 +412,8 @@ function setupCodeRunners() {
             langIcon = `<svg class="w-4 h-4 ${langColor}" viewBox="0 0 24 24" fill="currentColor"><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.564-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622L5.412 4.41l.698 8.01h9.126l-.325 3.426-2.91.804-2.955-.81-.212-2.272H6.182l.407 4.606 5.4 1.488 5.372-1.484.792-8.43H8.53z"/></svg>`;
         } else if (isReact) {
             langIcon = `<svg class="w-4 h-4 ${langColor}" viewBox="-11.5 -10.23174 23 20.46348" fill="currentColor"><circle cx="0" cy="0" r="2.05" fill="currentColor"/><g stroke="currentColor" stroke-width="1" fill="none"><ellipse rx="11" ry="4.2"/><ellipse rx="11" ry="4.2" transform="rotate(60)"/><ellipse rx="11" ry="4.2" transform="rotate(120)"/></g></svg>`;
+        } else if (isP5) {
+            langIcon = `<svg class="w-4 h-4 ${langColor}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line><line x1="7.05" y1="7.05" x2="16.95" y2="16.95"></line><line x1="7.05" y1="16.95" x2="16.95" y2="7.05"></line></svg>`;
         } else {
             langIcon = `<svg class="w-4 h-4 ${langColor} bg-black rounded-sm" viewBox="0 0 24 24" fill="currentColor"><path d="M0 0h24v24H0V0z" fill="none"/><path d="M12.2 16.66c.22.14.53.28.88.28.7 0 1-.36 1-.87v-.04c0-.62-.5-1-1.38-1.37-1.25-.5-2.08-1.28-2.08-2.5 0-1.52 1.15-2.62 2.92-2.62.9 0 1.58.2 1.96.38l-.4 1.35c-.24-.12-.66-.27-1.12-.27-.64 0-1 .34-1 .8v.04c0 .54.43.9 1.34 1.27 1.36.56 2.13 1.27 2.13 2.58 0 1.7-1.22 2.68-3.1 2.68-1.02 0-1.84-.25-2.32-.48l.45-1.42zM7.5 15.68c0 1.27.75 2.12 2.05 2.12.87 0 1.34-.23 1.63-.42l.33 1.33c-.4.27-1.18.5-2.13.5-2.18 0-3.66-1.35-3.66-3.65v-5.83h1.78v5.95z"/></svg>`;
         }
@@ -444,7 +469,7 @@ function setupCodeRunners() {
         if (isExecutable) {
             runBtn = document.createElement('button');
             runBtn.className = 'code-run-btn flex items-center gap-1.5 px-3 py-1.5 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-500 border border-green-500/20 hover:border-green-500/40 rounded-md transition-all cursor-pointer font-medium shadow-sm';
-            actionWord = isHTML ? 'Preview' : (isReact ? 'Render' : 'Run');
+            actionWord = isHTML ? 'Preview' : (isReact || isP5 ? 'Render' : 'Run');
             runBtn.innerHTML = `
                 <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
                 <span>${actionWord}</span>
@@ -534,8 +559,14 @@ function setupCodeRunners() {
                         if (error) {
                             outputArea.className = 'code-output p-3 text-red-400 font-mono text-[13px] whitespace-pre-wrap max-h-[500px] overflow-y-auto leading-relaxed bg-[#2a0e0e] border-l-2 border-red-500';
                             outputArea.textContent = error;
+                        }
+                    } else if (isP5) {
+                        const { element, error } = await runP5Code(codeText);
+                        if (error) {
+                            outputArea.className = 'code-output p-3 text-red-400 font-mono text-[13px] whitespace-pre-wrap max-h-[500px] overflow-y-auto leading-relaxed bg-[#2a0e0e] border-l-2 border-red-500';
+                            outputArea.textContent = error;
                         } else {
-                            outputArea.className = 'code-output p-3 bg-gray-50 rounded-b-lg max-h-[500px] overflow-y-auto text-black';
+                            outputArea.className = 'code-output max-h-[500px] overflow-y-auto p-0';
                             outputArea.appendChild(element);
                         }
                     } else if ((isJS || isTS) && codeText.includes('document.') && blockHtmlContext) {

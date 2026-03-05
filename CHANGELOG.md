@@ -1,8 +1,22 @@
 # Release Notes
 
-## 1.0.3 (2026-03-05)
+## 1.0.4 (2026-03-05)
 
 ### Added
+
+- **Interactive p5.js Runner**: Added support for p5.js sketches.
+  - New `p5-runner.ts` module with sandboxed iframe execution.
+  - Integrated p5.js library (v1.9.0) from CDN.
+  - Support for `p5js` and `p5` language tags in markdown.
+  - Added p5.js specific icon and "Render" action in the viewer.
+  - **Enhanced Viewer Logic**: Added auto-detection for p5.js patterns in standard `javascript` blocks (e.g. `setup()` + `createCanvas()`) to ensure backward compatibility.
+  - **Agent Prompts Updated**: Instructed all generation agents (`Chapter`, `Exercise`, `Quiz`) to specifically use the `p5js` tag for sketches.
+
+---
+
+## 1.0.3 (2026-03-05)
+
+### Added (1.0.4)
 
 - **Interactive Code Runners** for Python, JavaScript, TypeScript, HTML, and React directly inside the syllabus viewer.
   - Python execution runs client-side via Pyodide, supporting Matplotlib rendering and interactive `input()` via JS popups.
