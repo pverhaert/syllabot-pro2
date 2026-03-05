@@ -101,7 +101,8 @@ INSTRUCTIONS:
 - ensure that the content builds upon the previous chapter(s) and avoids unnecessary repetition.
 - Refer to concepts learned in the previous chapter if applicable.
 - **CRITICAL: Code Formatting Rules:**
-  - If you include any code snippets (HTML, CSS, JS, Python, etc.), you MUST wrap them in markdown code blocks (e.g. \`\`\`javascript ... \`\`\`).
+  - If you include any code snippets (HTML, CSS, JS, Python, p5.js, etc.), you MUST wrap them in markdown code blocks (e.g. \`\`\`javascript ... \`\`\`).
+  - **CRITICAL**: For interactive p5.js sketches (using functions like setup() and draw()), you MUST use the \`\`\`p5js\`\`\` language tag.
   - If you mention an HTML tag inline (e.g. <script>, <div>, <span>, <a>, etc.), you MUST wrap it in backticks (e.g. \` <script> \`, \` <div> \`, \` <span> \`, \` <a> \`).
   - **ALWAYS** ensure there is a blank line (newline) before starting a code block.
   - **NEVER** place a code block on the same line as text (e.g. INVALID: \`text\`\`\`javascript\`, VALID: \`text\\n\\n\`\`\`javascript\`).
