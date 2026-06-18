@@ -1,5 +1,9 @@
 # Release Notes
 
+## 1.0.5 (2026-06-16)
+
+- Update Model Selection.
+
 ## 1.0.4 (2026-03-05)
 
 ### Added

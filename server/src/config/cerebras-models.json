@@ -1,10 +1,10 @@
 [
-    {
-        "id": "llama-3.3-70b",
-        "name": "Llama 3.3 70B"
-    },
-    {
-        "id": "gpt-oss-120b",
-        "name": "GPT-OSS-120B"
-    }
+  {
+    "id": "gpt-oss-120b",
+    "name": "GPT-OSS-120B"
+  },
+  {
+    "id": "zai-glm-4.7",
+    "name": "Zai GLM 4.7"
+  }
 ]

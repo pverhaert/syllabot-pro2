@@ -1,4 +1,9 @@
 [
+
+    {
+        "id": "openai/gpt-oss-120b",
+        "name": "GPT-OSS-120B"
+    },
     {
         "id": "llama-3.3-70b-versatile",
         "name": "Llama 3.3 70B",
@@ -9,8 +14,8 @@
         "name": "Llama 3.1 8B"
     },
     {
-        "id": "openai/gpt-oss-120b",
-        "name": "GPT-OSS-120B"
+        "id": "groq/compound",
+        "name": "Groq Compound"
     },
     {
         "id": "meta-llama/llama-4-maverick-17b-128e-instruct",
